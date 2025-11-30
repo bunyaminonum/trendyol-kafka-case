@@ -1,0 +1,431 @@
+install terraform and add teraaform path to windows env  
+https://developer.hashicorp.com/terraform/install
+
+install aws cli on windows
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+
+create user on aws (trendyol-streaming-case)
+create group on aws (terraform-users) an set permissions as AdministratorAccess
+
+IAM > Users > trendyol-streaming-case > Create access key > Command Line Interface (CLI) > add-tag: trendyol-streaming-case-key
+
+aws configure
+
+PS C:\Users\onumb\OneDrive\Masaüstü\confluent\Interviews\trendyol> aws configure
+AWS Access Key ID [None]: AKIARVKK5CMUT53CY7BL
+AWS Secret Access Key [None]: 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
+Default region name [None]: eu-central-1
+Default output format [None]: json
+
+
+********ERROR (handled) ***************
+PS C:\Users\onumb\OneDrive\Masaüstü\confluent\Interviews\trendyol\trendyol-kafka-case> terraform init
+Initializing the backend...
+Initializing modules...
+- compute in modules\compute
+- network in modules\network
+- security in modules\security
+╷
+│ Error: Duplicate output definition
+│
+│   on modules\security\outputs.tf line 1:
+│    1: output "sg_id" {
+│
+│ An output named "sg_id" was already defined at modules\security\main.tf:49,1-15. Output names must be unique within a module.
+╵
+
+
+********************************************************************
+
+PS C:\Users\onumb\OneDrive\Masaüstü\confluent\Interviews\trendyol\trendyol-kafka-case> terraform init 
+Initializing the backend...
+Initializing modules...
+Initializing provider plugins...
+- Finding latest version of hashicorp/aws...
+- Installing hashicorp/aws v6.23.0...
+- Installed hashicorp/aws v6.23.0 (signed by HashiCorp)
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+
+
+
+
+
+
+*************************ERROR*****************************
+PS C:\Users\onumb\OneDrive\Masaüstü\confluent\Interviews\trendyol\trendyol-kafka-case> terraform apply
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.network.aws_vpc.main_vpc: Creating...
+module.network.aws_vpc.main_vpc: Still creating... [00m10s elapsed]
+module.network.aws_vpc.main_vpc: Creation complete after 13s [id=vpc-0ef6a3a371ee647eb]
+module.network.aws_internet_gateway.igw: Creating...
+module.network.aws_subnet.subnet_az2: Creating...
+module.network.aws_subnet.subnet_az3: Creating...
+module.network.aws_subnet.subnet_az1: Creating...
+module.security.aws_security_group.kafka_sg: Creating...
+module.network.aws_internet_gateway.igw: Creation complete after 1s [id=igw-049a399a2743d83b2]
+module.network.aws_route_table.public_rt: Creating...
+module.network.aws_route_table.public_rt: Creation complete after 1s [id=rtb-0f60e4876361391c4]
+module.security.aws_security_group.kafka_sg: Creation complete after 3s [id=sg-0c0c916b11e691b66]
+module.network.aws_subnet.subnet_az3: Still creating... [00m10s elapsed]
+module.network.aws_subnet.subnet_az2: Still creating... [00m10s elapsed]
+module.network.aws_subnet.subnet_az1: Still creating... [00m10s elapsed]
+module.network.aws_subnet.subnet_az2: Creation complete after 11s [id=subnet-0a2b56589ebd9d220]
+module.network.aws_route_table_association.b: Creating...
+module.compute.aws_instance.controller_az2: Creating...
+module.compute.aws_instance.broker_az2[0]: Creating...
+module.compute.aws_instance.broker_az2[1]: Creating...
+module.network.aws_route_table_association.b: Creation complete after 1s [id=rtbassoc-0a96bdf945be66db7]
+module.network.aws_subnet.subnet_az3: Creation complete after 12s [id=subnet-0bb57c629628f147c]
+module.network.aws_route_table_association.c: Creating...
+module.compute.aws_instance.controller_az3: Creating...
+module.network.aws_subnet.subnet_az1: Creation complete after 12s [id=subnet-069fc61b5cc891250]
+module.network.aws_route_table_association.a: Creating...
+module.compute.aws_instance.broker_az1[0]: Creating...
+module.compute.aws_instance.observability: Creating...
+module.compute.aws_instance.connect: Creating...
+module.compute.aws_instance.broker_az1[1]: Creating...
+module.compute.aws_instance.controller_az1: Creating...
+module.network.aws_route_table_association.c: Creation complete after 0s [id=rtbassoc-0d372da900f100033]
+module.network.aws_route_table_association.a: Creation complete after 0s [id=rtbassoc-041b79aa506bd0511]
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: b2b51045-1e83-407b-9adb-74d81c443ea2, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.broker_az1[0],
+│   on modules\compute\main.tf line 23, in resource "aws_instance" "broker_az1":
+│   23: resource "aws_instance" "broker_az1" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: 6c5bbcb1-fc95-408d-8b6f-a3cbb18d14fa, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.broker_az1[1],
+│   on modules\compute\main.tf line 23, in resource "aws_instance" "broker_az1":
+│   23: resource "aws_instance" "broker_az1" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: c5d5a486-eae5-4420-8496-a95e535dcc7d, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.broker_az2[1],
+│   on modules\compute\main.tf line 38, in resource "aws_instance" "broker_az2":
+│   38: resource "aws_instance" "broker_az2" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: 4f6510d7-e55e-4e63-bb69-c984d14f10bd, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.broker_az2[0],
+│   on modules\compute\main.tf line 38, in resource "aws_instance" "broker_az2":
+│   38: resource "aws_instance" "broker_az2" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: a66f78b9-c720-4b20-8f05-137e543f6670, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.controller_az1,
+│   on modules\compute\main.tf line 56, in resource "aws_instance" "controller_az1":
+│   56: resource "aws_instance" "controller_az1" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: 80a8e7b5-45bd-4ea7-8bcd-238673411075, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.controller_az2,
+│   on modules\compute\main.tf line 69, in resource "aws_instance" "controller_az2":
+│   69: resource "aws_instance" "controller_az2" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: db10d011-81d5-4cd9-a464-d2c3781d66f2, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.controller_az3,
+│   on modules\compute\main.tf line 82, in resource "aws_instance" "controller_az3":
+│   82: resource "aws_instance" "controller_az3" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: 6444e47d-80db-490e-8f28-cced17c7d7bb, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.connect,
+│   on modules\compute\main.tf line 99, in resource "aws_instance" "connect":
+│   99: resource "aws_instance" "connect" {
+│
+╵
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: 41ee738b-e6d2-4dad-af05-82dc6a919b7f, api error InvalidKeyPair.NotFound: The key pair 'kafka-key' does not exist
+│
+│   with module.compute.aws_instance.observability,
+│   on modules\compute\main.tf line 116, in resource "aws_instance" "observability":
+│  116: resource "aws_instance" "observability" {
+│
+╵
+
+
+*********************************************************** Handling Steps **********************
+aws seacrh bar ec2 yaz ve servise  tıkla (sağ üstte frankfurt (eu-central-1) seçili olduğundan emin ol)
+
+AWS Konsoluna Gir: Tarayıcıdan AWS hesabına giriş yap.
+
+Bölgeyi Kontrol Et (Çok Önemli): Sağ üst köşede bölgenin Frankfurt (eu-central-1) seçili olduğundan emin ol.
+
+EC2 Servisine Git: Arama çubuğuna EC2 yaz ve tıkla.
+
+Soldaki menüde aşağı in, Network & Security başlığı altında Key Pairs seçeneğine tıkla.
+
+Sağ üstten Create key pair (Turuncu buton) de.
+
+Name: kafka-key (Tam olarak bu ismi yazmalısın, kodda bunu kullandık).
+
+Key pair type: RSA (Olduğu gibi kalsın).
+
+Private key file format: .pem (Windows/OpenSSH için ideal, kalsın).
+
+Create key pair butonuna tıkla.
+
+Bu dosyayı masaüstündeki proje klasörünün içine (trendyol-kafka-case klasörüne) at şimdilik.
+
+************************************************************************************************************
+
+
+
+
+PS C:\Users\onumb\OneDrive\Masaüstü\confluent\Interviews\trendyol\trendyol-kafka-case> terraform apply
+
+
+************************************************* ERROR  **************
+
+╷
+│ Error: creating EC2 Instance: operation error EC2: RunInstances, https response error StatusCode: 400, RequestID: f03585c2-ab06-475b-ac39-0519b4f70d1f, api error PendingVerification: Your request for accessing resources in this region is being validated, and you will not be able to launch additional resources in this region until the validation is complete. We will notify you by email once your request has been validated. While normally resolved within minutes, please allow up to 4 hours for this process to complete. If the issue still persists, then open a support case. [https://support.console.aws.amazon.com/support/home?region=us-east-1#/case/create?issueType=customer-service&serviceCode=account-management&categoryCode=account-verification]
+│
+│   with module.compute.aws_instance.observability,
+│   on modules\compute\main.tf line 116, in resource "aws_instance" "observability":
+│  116: resource "aws_instance" "observability" {
+
+
+****************************** Handled ******************
+PS C:\Users\onumb\OneDrive\Masaüstü\confluent\Interviews\trendyol\trendyol-kafka-case> terraform apply
+
+
+
+Outputs:
+
+kafka_broker_ips = [
+  "18.192.26.6",
+  "63.180.246.16",
+  "52.59.133.157",
+  "18.156.34.71",
+]
+kafka_connect_ip = "18.196.163.74"
+kafka_controller_ips = [
+  "54.93.198.221",
+  "18.193.73.54",
+  "35.159.239.40",
+]
+kafka_observability_ip = "3.71.50.55"
+
+Bastion Host / Jump Server: "3.71.50.55"
+
+# Windows'tan Linux'a dosya atma komutu
+scp -i "kafka-key.pem" kafka-key.pem ubuntu@3.71.50.55:/home/ubuntu/kafka-key.pem
+
+
+
+
+ssh -i "kafka-key.pem" ubuntu@3.71.50.55
+
+
+*************************** gerekli paketlerin kurulumu: ***************************
+# 1. Paketleri güncelle
+sudo apt-get update
+
+# 2. Python ve gerekli araçları kur
+sudo apt-get install -y python3-pip software-properties-common git
+
+# 3. Ansible deposunu ekle
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+
+# 4. Ansible'ı kur
+sudo apt-get install -y ansible
+
+# 5. Kurulumu kontrol et
+ansible --version
+
+chmod 400 /home/ubuntu/kafka-key.pem
+
+ubuntu@ip-10-0-1-55:~$ ansible --version
+ansible [core 2.17.14]
+  config file = /etc/ansible/ansible.cfg
+  configured module search path = ['/home/ubuntu/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules'] 
+  ansible python module location = /usr/lib/python3/dist-packages/ansible
+  ansible collection location = /home/ubuntu/.ansible/collections:/usr/share/ansible/collections
+  executable location = /usr/bin/ansible
+  python version = 3.10.12 (main, Nov  4 2025, 08:48:33) [GCC 11.4.0] (/usr/bin/python3)
+  jinja version = 3.0.3
+  libyaml = True
+  
+  
+
+Adım 1: Confluent Ansible Reposunu İndirme
+
+# 1. Ana dizine dönelim
+cd /home/ubuntu
+
+# 2. Confluent Ansible projesini indirelim
+git clone https://github.com/confluentinc/cp-ansible
+
+# 3. Klasörün içine girelim
+cd cp-ansible
+
+# 4. Kararlı bir versiyona geçelim (En güncel stabil sürüm)
+git checkout 7.9.4-post
+
+
+
+
+
+
+
+
+
+# cp-ansible klasöründen çıkın
+cd ~
+
+# Yeni çalışma dizini oluşturun
+mkdir -p kafka-deploy
+cd kafka-deploy
+
+# hosts.yml dosyasını kopyalayın
+cp ~/cp-ansible/hosts.yml .
+
+# Koleksiyonu kurun
+ansible-galaxy collection install confluent.platform:==7.9.0
+
+****************
+	ubuntu@ip-10-0-1-55:~/kafka-deploy$ ansible-galaxy collection install confluent.platform:==7.9.0
+	Starting galaxy collection install process
+	Process install dependency map
+	Starting collection install process
+	Downloading https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/confluent-platform-7.9.0.tar.gz to /home/ubuntu/.ansible/tmp/ansible-local-4570abc5ucpc/tmp1uo3d9zo/confluent-platform-7.9.0-dlpaen34
+	Installing 'confluent.platform:7.9.0' to '/home/ubuntu/.ansible/collections/ansible_collections/confluent/platform'
+	confluent.platform:7.9.0 was installed successfully
+***********
+
+# Ana dizine dön
+cd ~
+
+# Yeni ve temiz bir klasör aç
+mkdir -p kafka-deploy
+cd kafka-deploy
+
+[dosyalar bastion sunucusunda}
+vi hosts.yml 
+**************error******
+ansible playbook da kafka scram protokolünü desteklemez o yüzden bu şekilde set edilmesi lazım:
+    kafka_controller_sasl_protocol: ssl
+    kafka_controller_sasl_mechanism: SSL
+*****************
+
+vi ansible.cfg
+[defaults]
+hash_behaviour = merge
+host_key_checking = False
+
+
+
+
+# Playbook'u koleksiyon formatında çalıştırın
+ansible-playbook -i hosts.yml confluent.platform.all
+
+*********error***********
+ "The following packages have unmet dependencies:", " confluent-rest-utils : Depends: confluent-common (= 7.9.5-1) but 7.9.0-1 is to be installed"]}
+
+**************handling*********
+# Koleksiyonun yerini bul
+ansible-galaxy collection list | grep confluent
+
+# Manuel olarak sil
+rm -rf ~/.ansible/collections/ansible_collections/confluent
+
+# En son versiyonu kur
+ansible-galaxy collection install confluent.platform --force
+
+# Versiyonu doğrula
+ansible-galaxy collection list | grep confluent
+
+
+cache temizleme:
+ansible -i hosts.yml all -m shell -a "
+sudo apt-get clean
+sudo rm -rf /var/lib/apt/lists/*
+sudo rm -rf /var/cache/apt/archives/*
+sudo dpkg --configure -a
+sudo apt-get update
+" --become
+
+
+ansible-playbook -i hosts.yml confluent.platform.all
+
+
+***************** error **************
+fatal: [54.93.198.221]: FAILED! => {"changed": false, "cmd": "/usr/bin/kafka-metadata-quorum --bootstrap-server 18.192.26.6:9092  --command-config /etc/controller/client.properties describe --replication\n", "delta": "0:01:02.894095", "end": "2025-11-29 23:17:24.159450", "msg": "non-zero return code", "rc": 1, "start": "2025-11-29 23:16:21.265355", "stderr": "org.apache.kafka.common.errors.TimeoutException: Timed out waiting for a node assignment. Call: describeMetadataQuorum\njava.util.concurrent.ExecutionException: org.apache.kafka.common.errors.TimeoutException: Timed out waiting for a node assignment. Call: describeMetadataQuorum\n\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:396)\n\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2073)\n\tat org.apache.kafka.common.internals.KafkaFutureImpl.get(KafkaFutureImpl.java:155)\n\tat org.apache.kafka.tools.MetadataQuorumCommand.handleDescribeReplication(MetadataQuorumCommand.java:199)\n\tat org.apache.kafka.tools.MetadataQuorumCommand.execute(MetadataQuorumCommand.java:135)\n\tat org.apache.kafka.tools.MetadataQuorumCommand.mainNoExit(MetadataQuorumCommand.java:82)\n\tat org.apache.kafka.tools.MetadataQuorumCommand.main(MetadataQuorumCommand.java:77)\nCaused by: org.apache.kafka.common.errors.TimeoutException: Timed out waiting for a node assignment. Call: describeMetadataQuorum", "stderr_lines": ["org.apache.kafka.common.errors.TimeoutException: Timed out waiting for a node assignment. Call: describeMetadataQuorum", "java.util.concurrent.ExecutionException: org.apache.kafka.common.errors.TimeoutException: Timed out waiting for a node assignment. Call: describeMetadataQuorum", "\tat java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:396)", "\tat java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2073)", "\tat org.apache.kafka.common.internals.KafkaFutureImpl.get(KafkaFutureImpl.java:155)", "\tat org.apache.kafka.tools.MetadataQuorumCommand.handleDescribeReplication(MetadataQuorumCommand.java:199)", "\tat org.apache.kafka.tools.MetadataQuorumCommand.execute(MetadataQuorumCommand.java:135)", "\tat org.apache.kafka.tools.MetadataQuorumCommand.mainNoExit(MetadataQuorumCommand.java:82)", "\tat org.apache.kafka.tools.MetadataQuorumCommand.main(MetadataQuorumCommand.java:77)", "Caused by: org.apache.kafka.common.errors.TimeoutException: Timed out waiting for a node assignment. Call: describeMetadataQuorum"], "stdout": "", "stdout_lines": []}
+
+*************************************
+
+
+error handling:
+# 1. Controller makinesine geçiş yap
+ssh -i /home/ubuntu/kafka-key.pem ubuntu@54.93.198.221
+
+# 2. İçeri girince logları kontrol et (En son ne olmuş?)
+sudo cat /var/log/kafka/server.log | grep -i "ERROR" | tail -n 20
+
+root@ip-10-0-1-210:/var/log/controller# tail -500f controller.log
+
+[2025-11-29 23:15:00,816] INFO [ControllerServer id=9991] Registering periodic task writeNoOpRecord to run every 500 ms (org.apache.kafka.controller.PeriodicTaskControlManager)
+[2025-11-29 23:31:01,025] INFO [CelltControllerMetricsPublisher id=9991] No cells found. Skipping cell metrics refresh. (org.apache.kafka.controller.metrics.CellControllerMetricsPublisher)
+
+Yorum: biz node.id aslında 1 atamışken 9991 gibi otomatik atama yapmış. bunun için node_id parametresi ekledik playbookda (hosts.yml)
+
+
+hosts.yaml dosyasına   'kafka_controller_quorum_voters: "1@54.93.198.221:9093,2@18.193.73.54:9093,3@35.159.239.40:9093"' parametresi eklendi
+
+clear controller data : ansible -i hosts.yml kafka_controller -m shell -a "rm -f /etc/controller/server.properties && rm -rf /var/lib/controller/data/* && rm -f /var/log/controller/*" --become
+ubuntu@ip-10-0-1-55:~/kafka-deploy$ ansible -i hosts.yml kafka_controller -m shell -a "rm -f /etc/controller/server.properties && rm -rf /var/lib/controller/data/* && rm -f /var/log/controller/*" --become
+[WARNING]: Platform linux on host 35.159.239.40 is using the discovered Python interpreter at
+/usr/bin/python3.10, but future installation of another Python interpreter could change the meaning of that path. 
+See https://docs.ansible.com/ansible-core/2.17/reference_appendices/interpreter_discovery.html for more
+information.
+35.159.239.40 | CHANGED | rc=0 >>
+
+
+ip öğren:
+ansible -i hosts.yml all -m setup -a "filter=ansible_default_ipv4"
+
+healtcheck atla (controllerlar brokerlardan önce kuruluyor ve brokerlara bağlanmaya çalışıyor healtcheck mekanizmasında düzeltme lazım)
+
+aşağıdaki komutla beraber brokerlar oluştu ama disk yetersizliğinden ayağa kalmadı
+ansible-playbook -i hosts.yml confluent.platform.all --skip-tags health_check 
+
+
+
+
