@@ -573,12 +573,17 @@ mkdir kafka-deploy
 cd kafka-deploy
 vi hosts.yml
 
+vi ansible.cfg
+	[defaults]
+	hash_behaviour = merge
+	host_key_checking = False
+	
 on windows terminal:
 	scp -i "kafka-key.pem" kafka-key.pem ubuntu@3.123.35.145:/home/ubuntu/kafka-key.pem
 	
 on bastion host terminal:
 	chmod 400 /home/ubuntu/kafka-key.pem
-	ansible-playbook -i hosts.yml confluent.platform.all --skip-tags health_check
+	ansible-playbook -i hosts.yml confluent.platform.all -vvv
 	
 	
 	
@@ -614,14 +619,26 @@ server.log 10.0.1.103
 
 
 TRY FIXING:
-	# 1. Eski (bozuk IP'li) sertifikaları sil
-	rm -rf generated_ssl_files
+	- rm -rf generated_ssl_files
 
-	# 2. Her şeyi temizle (Clean State)
-	ansible -i hosts.yml all -m shell -a "systemctl stop confluent-server confluent-kafka-connect && rm -f /etc/controller/server.properties /etc/kafka/server.properties && rm -rf /var/lib/controller/data/* /var/lib/kafka/data/* /var/log/controller/* /var/log/kafka/* /var/ssl/private/*" --become
+	- ansible -i hosts.yml all -m shell -a "systemctl stop confluent-server confluent-kafka-connect && rm -f /etc/controller/server.properties /etc/kafka/server.properties && rm -rf /var/lib/controller/data/* /var/lib/kafka/data/* /var/log/controller/* /var/log/kafka/* /var/ssl/private/*" --become
 
-	# 3. KURULUMU BAŞLAT
-	ansible-playbook -i hosts.yml confluent.platform.all --skip-tags health_check
+	hosts.yml da bu parametreyi düzelt :
+	- kafka_controller_quorum_voters: "1@ip-10-0-1-68.eu-central-1.compute.internal:9093,2@ip-10-0-2-183.eu-central-1.compute.internal:9093,3@ip-10-0-3-103.eu-central-1.compute.internal:9093"
+
+	ansible-playbook -i hosts.yml confluent.platform.all
 	
-	host.yml da bu parametreyi düzelt:
-	kafka_controller_quorum_voters: "1@ip-10-0-1-68.eu-central-1.compute.internal:9093,2@ip-10-0-2-183.eu-central-1.compute.internal:9093,3@ip-10-0-3-103.eu-central-1.compute.internal:9093"
+
+
+PLAY RECAP ******************************************************************************************************************************************
+ip-10-0-1-240.eu-central-1.compute.internal : ok=178  changed=24   unreachable=0    failed=0    skipped=145  rescued=0    ignored=0
+ip-10-0-1-244.eu-central-1.compute.internal : ok=163  changed=29   unreachable=0    failed=0    skipped=168  rescued=0    ignored=0
+ip-10-0-1-7.eu-central-1.compute.internal : ok=164  changed=30   unreachable=0    failed=0    skipped=172  rescued=0    ignored=0
+ip-10-0-1-80.eu-central-1.compute.internal : ok=154  changed=29   unreachable=0    failed=0    skipped=224  rescued=0    ignored=0
+ip-10-0-2-185.eu-central-1.compute.internal : ok=163  changed=29   unreachable=0    failed=0    skipped=168  rescued=0    ignored=0
+ip-10-0-2-70.eu-central-1.compute.internal : ok=158  changed=20   unreachable=0    failed=0    skipped=133  rescued=0    ignored=0
+ip-10-0-2-185.eu-central-1.compute.internal : ok=163  changed=29   unreachable=0    failed=0    skipped=168  rescued=0    ignored=0
+ip-10-0-2-70.eu-central-1.compute.internal : ok=158  changed=20   unreachable=0    failed=0    skipped=133  rescued=0    ignored=0
+ip-10-0-2-70.eu-central-1.compute.internal : ok=158  changed=20   unreachable=0    failed=0    skipped=133  rescued=0    ignored=0
+ip-10-0-2-91.eu-central-1.compute.internal : ok=163  changed=29   unreachable=0    failed=0    skipped=168  rescued=0    ignored=0
+ip-10-0-3-250.eu-central-1.compute.internal : ok=158  changed=20   unreachable=0    failed=0    skipped=133  rescued=0    ignored=0
