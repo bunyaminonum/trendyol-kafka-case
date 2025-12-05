@@ -1,0 +1,57 @@
+ssh -i "kafka-key.pem" ubuntu@<bastion-(observability)-host-ip>
+ssh -i "kafka-key.pem" ubuntu@10.0.1.80
+
+#Stop Conflicting Services
+sudo systemctl stop confluent-kafka-connect
+sudo systemctl disable confluent-kafka-connect
+
+****************************************************************** install docker *********************************************************************
+
+sudo apt-get update
+
+sudo apt-get install -y ca-certificates curl gnupg
+
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker --version
+docker run hello-world
+
+
+***************************************************************************************************************************************
+
+
+****************************************************************** Deploy Kafka Connect *********************************************************************
+
+
+#Ensure the Docker container can read the SSL files mounted from the host
+sudo chmod +x /var/ssl/private
+sudo chmod 644 /var/ssl/private/*.jks
+
+#files (available on github)
+vi Dockerfile
+vi docker-compose.yml
+
+docker compose up -d --build
+
+#show logs
+docker compose logs -f
+    - kafka-connect  | [2025-12-05 05:53:30,904] INFO 172.18.0.1 - - [05/Dec/2025:05:53:30 +0000] "GET /connectors HTTP/1.1" 200 2 "" "curl/7.76.1" 1 (org.apache.kafka.connect.runtime.rest.RestServer)
+
+#check http connector availability
+curl -s http://localhost:8083/connector-plugins | grep "http"
+
+#check metrics
+curl -s http://localhost:8079/metrics | head -n 5

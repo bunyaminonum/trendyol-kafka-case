@@ -1,0 +1,72 @@
+services:
+  kafka-connect:
+    build: .
+    hostname: ip-10-0-1-80
+    container_name: kafka-connect
+    ports:
+      - "8083:8083"  # Kafka Connect REST API
+      - "8079:8079"  # Prometheus JMX Metrics
+    volumes:
+      # Mount SSL certificates from the host machine (Read-Only)
+      - /var/ssl/private:/etc/kafka/secrets:ro
+    environment:
+      # --- Kafka Cluster Connection ---
+      CONNECT_BOOTSTRAP_SERVERS: "ip-10-0-1-7.eu-central-1.compute.internal:9092,ip-10-0-1-244.eu-central-1.compute.internal:9092,ip-10-0-2-185.eu-central-1.compute.internal:9092,ip-10-0-2-91.eu-central-1.compute.internal:9092"
+
+      # --- Connect Cluster Identity ---
+      CONNECT_GROUP_ID: "connect-cluster"
+
+      # UPDATED TOPIC NAMES (Simpler naming)
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+
+      # --- Converters (JSON - No Schema Registry) ---
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+
+      # Internal Converters (Must always be JSON/String)
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+
+      # --- REST API ---
+      CONNECT_REST_ADVERTISED_HOST_NAME: "ip-10-0-1-80.eu-central-1.compute.internal"
+      CONNECT_REST_PORT: 8083
+
+      # --- SECURITY: Worker -> Broker Connection (SCRAM-SHA-512 + SSL) ---
+      CONNECT_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_SASL_MECHANISM: "SCRAM-SHA-512"
+      CONNECT_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/kafka_connect.truststore.jks"
+      CONNECT_SSL_TRUSTSTORE_PASSWORD: "confluenttruststorepass"
+      CONNECT_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="kafka_connect" password="kafka_connect-secret";'
+
+      # --- SECURITY: Connector Data Plane ---
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_PRODUCER_SASL_MECHANISM: "SCRAM-SHA-512"
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/kafka_connect.truststore.jks"
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: "confluenttruststorepass"
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="kafka_connect" password="kafka_connect-secret";'
+
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_CONSUMER_SASL_MECHANISM: "SCRAM-SHA-512"
+      CONNECT_CONSUMER_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/kafka_connect.truststore.jks"
+      CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: "confluenttruststorepass"
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="kafka_connect" password="kafka_connect-secret";'
+
+      # --- JMX Exporter (Prometheus) ---
+      # Uses the official Confluent config downloaded in Dockerfile
+      KAFKA_OPTS: "-javaagent:/opt/jmx-exporter/jmx_prometheus_javaagent.jar=8079:/opt/jmx-exporter/config.yaml"
+      KAFKA_HEAP_OPTS: "-Xms512M -Xmx2G"
+      CONNECT_UPLINK_TIMEOUT_MS: 60000
+      CONNECT_RETRY_BACKOFF_MS: 1000
+    extra_hosts:
+      - "ip-10-0-1-7.eu-central-1.compute.internal:10.0.1.7"
+      - "ip-10-0-1-244.eu-central-1.compute.internal:10.0.1.244"
+      - "ip-10-0-2-185.eu-central-1.compute.internal:10.0.2.185"
+      - "ip-10-0-2-91.eu-central-1.compute.internal:10.0.2.91"
