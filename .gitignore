@@ -1,6 +1,3 @@
-# Notes folder
-notes/
-
 # Terraform
 *.tfstate
 *.tfstate.*
