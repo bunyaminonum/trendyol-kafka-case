@@ -159,7 +159,7 @@ curl http://<observability-ip>:2020/health
 curl http://<observability-ip>:2020/brokers
 ```
 
-#### Deploy Kafka Connect (10 minutes)
+#### Deploy Kafka Connect
 
 ```bash
 ssh ubuntu@<connect-ip>
