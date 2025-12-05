@@ -1,0 +1,128 @@
+---
+- name: Install Node Exporter on All Nodes
+  hosts: all
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Install required packages (Debian/Ubuntu)
+      apt:
+        name:
+          - wget
+          - tar
+          - curl
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Check if node_exporter is already installed
+      stat:
+        path: /usr/local/bin/node_exporter
+      register: node_exporter_binary
+
+    - name: Download Node Exporter tarball
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        dest: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+        mode: '0644'
+      when: not node_exporter_binary.stat.exists
+
+    - name: Extract Node Exporter tarball
+      unarchive:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.tar.gz"
+        dest: /tmp
+        remote_src: yes
+      when: not node_exporter_binary.stat.exists
+
+    - name: Copy Node Exporter binary to /usr/local/bin
+      copy:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+        dest: /usr/local/bin/node_exporter
+        mode: '0755'
+        remote_src: yes
+      when: not node_exporter_binary.stat.exists
+
+    - name: Create node_exporter systemd service
+      copy:
+        content: |
+          [Unit]
+          Description=Node Exporter
+          After=network.target
+
+          [Service]
+          User=root
+          ExecStart=/usr/local/bin/node_exporter --web.listen-address=:{{ node_exporter_port }}
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/node_exporter.service
+      notify: Restart node_exporter
+
+    - name: Enable and start node_exporter
+      systemd:
+        name: node_exporter
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+  handlers:
+    - name: Restart node_exporter
+      systemd:
+        name: node_exporter
+        state: restarted
+        daemon_reload: yes
+
+
+- name: Configure Prometheus Alerts
+  hosts: observability
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Ensure Prometheus rules directory exists
+      file:
+        path: /etc/prometheus/rules
+        state: directory
+        mode: '0755'
+
+    - name: Create Alert Rules File
+      copy:
+        dest: /etc/prometheus/rules/alerts.yml
+        content: |
+          {% raw %}
+          groups:
+            - name: infrastructure_alerts
+              interval: 30s
+              rules:
+                - alert: InstanceDown
+                  expr: up == 0
+                  for: 1m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: "Instance {{ $labels.instance }} is down"
+
+                - alert: HostMemoryUsageHigh
+                  expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+                  for: 5m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "High Memory Usage on {{ $labels.instance }}"
+
+                - alert: HostDiskSpaceLow
+                  expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+                  for: 5m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: "Low Disk Space on {{ $labels.instance }}"
+          {% endraw %}
+      notify: Reload Prometheus
+
+  handlers:
+    - name: Reload Prometheus
+      systemd:
+        name: prometheus
+        state: reloaded

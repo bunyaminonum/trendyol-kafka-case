@@ -1,0 +1,19 @@
+ubuntu@ip-10-0-1-144:~/kafka-api$ curl -s http://10.0.1.80:8083/connectors/http-source-topics-list/status | jq
+{
+  "name": "http-source-topics-list",
+  "connector": {
+    "state": "RUNNING",
+    "worker_id": "ip-10-0-1-80.eu-central-1.compute.internal:8083",
+    "version": "0.0.0.0"
+  },
+  "tasks": [
+    {
+      "id": 0,
+      "state": "FAILED",
+      "worker_id": "ip-10-0-1-80.eu-central-1.compute.internal:8083",
+      "version": "0.0.0.0",
+      "trace": "java.lang.NoClassDefFoundError: freemarker/template/Configuration\n\tat java.base/java.lang.Class.getDeclaredConstructors0(Native Method)\n\tat java.base/java.lang.Class.privateGetDeclaredConstructors(Unknown Source)\n\tat java.base/java.lang.Class.getConstructor0(Unknown Source)\n\tat java.base/java.lang.Class.getDeclaredConstructor(Unknown Source)\n\tat org.apache.kafka.common.utils.Utils.newInstance(Utils.java:401)\n\tat org.apache.kafka.common.config.AbstractConfig.getConfiguredInstance(AbstractConfig.java:405)\n\tat org.apache.kafka.common.config.AbstractConfig.getConfiguredInstance(AbstractConfig.java:444)\n\tat org.apache.kafka.common.config.AbstractConfig.getConfiguredInstance(AbstractConfig.java:429)\n\tat com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactoryConfig.<init>(TemplateHttpRequestFactoryConfig.java:66)\n\tat com.github.castorm.kafka.connect.http.request.template.TemplateHttpRequestFactory.configure(TemplateHttpRequestFactory.java:48)\n\tat org.apache.kafka.common.config.AbstractConfig.getConfiguredInstance(AbstractConfig.java:412)\n\tat org.apache.kafka.common.config.AbstractConfig.getConfiguredInstance(AbstractConfig.java:444)\n\tat org.apache.kafka.common.config.AbstractConfig.getConfiguredInstance(AbstractConfig.java:429)\n\tat com.github.castorm.kafka.connect.http.HttpSourceConnectorConfig.<init>(HttpSourceConnectorConfig.java:71)\n\tat com.github.castorm.kafka.connect.http.HttpSourceTask.start(HttpSourceTask.java:86)\n\tat org.apache.kafka.connect.runtime.AbstractWorkerSourceTask.initializeAndStart(AbstractWorkerSourceTask.java:288)\n\tat org.apache.kafka.connect.runtime.WorkerTask.doStart(WorkerTask.java:191)\n\tat org.apache.kafka.connect.runtime.WorkerTask.doRun(WorkerTask.java:242)\n\tat org.apache.kafka.connect.runtime.WorkerTask.run(WorkerTask.java:298)\n\tat org.apache.kafka.connect.runtime.AbstractWorkerSourceTask.run(AbstractWorkerSourceTask.java:83)\n\tat org.apache.kafka.connect.runtime.isolation.Plugins.lambda$withClassLoader$1(Plugins.java:254)\n\tat java.base/java.util.concurrent.Executors$RunnableAdapter.call(Unknown Source)\n\tat java.base/java.util.concurrent.FutureTask.run(Unknown Source)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)\n\tat java.base/java.lang.Thread.run(Unknown Source)\nCaused by: java.lang.ClassNotFoundException: freemarker.template.Configuration\n\tat java.base/java.net.URLClassLoader.findClass(Unknown Source)\n\tat java.base/java.lang.ClassLoader.loadClass(Unknown Source)\n\tat org.apache.kafka.connect.runtime.isolation.PluginClassLoader.loadClass(PluginClassLoader.java:126)\n\tat java.base/java.lang.ClassLoader.loadClass(Unknown Source)\n\t... 26 more\n"
+    }
+  ],
+  "type": "source"
+}
