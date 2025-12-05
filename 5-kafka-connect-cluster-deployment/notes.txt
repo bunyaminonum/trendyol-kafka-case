@@ -41,6 +41,8 @@ sudo chmod +x /var/ssl/private
 sudo chmod 644 /var/ssl/private/*.jks
 
 #files (available on github)
+cd
+cd 3-observability
 vi Dockerfile
 vi docker-compose.yml
 
