@@ -352,6 +352,7 @@ def describe_consumer_group(group_id):
 
             members = []
             for member in group_description.members:
+
                 assignment = []
                 if member.assignment:
                     for topic_partition in member.assignment.topic_partitions:
@@ -370,7 +371,6 @@ def describe_consumer_group(group_id):
             group_details = {
                 "group_id": group_description.group_id,
                 "state": str(group_description.state),
-                "protocol_type": group_description.protocol_type,
                 "protocol": group_description.protocol,
                 "coordinator": {
                     "id": group_description.coordinator.id,
@@ -380,7 +380,9 @@ def describe_consumer_group(group_id):
                 "members": members,
                 "member_count": len(members)
             }
-
+        if group_description.protocol_type:
+                    group_details["protocol_type"] = group_description.protocol_type
+                    
         if group_details:
             return jsonify({
                 **group_details,

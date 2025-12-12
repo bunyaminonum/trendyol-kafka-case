@@ -1,0 +1,304 @@
+install terraform and add teraaform path to windows env  
+https://developer.hashicorp.com/terraform/install
+
+install aws cli on windows
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+
+create user on aws (trendyol-streaming-case)
+create group on aws (terraform-users) an set permissions as AdministratorAccess
+
+IAM > Users > trendyol-streaming-case > Create access key > Command Line Interface (CLI) > add-tag: trendyol-streaming-case-key
+
+
+vscode terminal:
+ - aws configure
+
+PS C:\Users\onumb\OneDrive\Masaüstü\confluent\Interviews\trendyol> aws configure
+.
+.
+..
+
+
+scp -i "kafka-key.pem" kafka-key.pem ubuntu@3.71.50.55:/home/ubuntu/kafka-key.pem
+
+
+
+ansible kafka_controller -i hosts.yml -m shell -a "systemctl status confluent-kcontroller"
+
+ansible kafka_broker -i hosts.yml -m shell -a "systemctl status confluent-server"
+
+ansible -i hosts.yml kafka_broker -m shell -a "kafka-topics --bootstrap-server ip-10-0-1-7.eu-central-1.compute.internal:9092 --list --command-config /etc/kafka/client.properties" --become --limit ip-10-0-1-7.eu-central-1.compute.internal
+
+sudo kafka-acls --bootstrap-server ip-10-0-2-91.eu-central-1.compute.internal:9092 \
+  --command-config /etc/kafka/client.properties \
+  --add \
+  --allow-principal User:test-user \
+  --operation Read \
+  --topic test-topic
+  
+  
+ubuntu@ip-10-0-1-7:~$   
+sudo kafka-acls --bootstrap-server ip-10-0-1-7.eu-central-1.compute.internal:9092 \
+  --command-config /etc/kafka/client.properties \
+  --add \
+  --allow-principal User:admin \
+  --operation All \
+  --topic '*'
+
+  
+
+sudo kafka-acls --bootstrap-server ip-10-0-1-7.eu-central-1.compute.internal:9092 \
+  --command-config /etc/kafka/client.properties \
+  --add \
+  --allow-principal User:admin \
+  --operation All \
+  --group '*'
+
+sudo kafka-acls --bootstrap-server ip-10-0-1-7.eu-central-1.compute.internal:9092 \
+  --command-config /etc/kafka/client.properties \
+  --add \
+  --allow-principal User:kafka_connect \
+  --operation All \
+  --group '*'
+
+  
+sudo vi /etc/kafka/server.properties
+sudo vi /etc/controller/server.properties
+  
+  # Maintained by Ansible
+authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+super.users=User:admin
+
+# ... geri kalan ayarlar aşağıda kalsın ...
+
+sudo vi /var/log/controller/server.log
+
+
+
+
+sudo vi /var/log/kafka/server.log
+/ACL
+
+sudo kafka-acls --bootstrap-server ip-10-0-2-91.eu-central-1.compute.internal:9092 \
+  --command-config /etc/kafka/client.properties \
+  --add \
+  --allow-principal User:test-user \
+  --operation Read \
+  --topic test-topic
+
+sudo kafka-acls --bootstrap-server ip-10-0-2-91.eu-central-1.compute.internal:9092 \
+--list \
+--command-config /etc/kafka/client.properties
+  
+  
+sudo kafka-acls --bootstrap-server ip-10-0-1-7.eu-central-1.compute.internal:9092 \
+  --command-config /etc/kafka/client.properties \
+  --add \
+  --allow-principal User:kafka_connect \
+  --operation All \
+  --topic connect-configs \
+  --topic connect-offsets \
+  --topic connect-status \
+  --group connect-cluster
+  
+  
+sudo kafka-console-producer \
+  --bootstrap-server ip-10-0-1-7.eu-central-1.compute.internal:9092 \
+  --topic topic-1 \
+  --producer.config /etc/kafka/client.properties
+  
+sudo kafka-metadata-quorum --bootstrap-server 10.0.1.240:9093 \
+  --command-config /etc/kafka/controller.properties \
+  describe --status
+  
+  
+  
+sudo kafka-console-producer \
+  --bootstrap-server ip-10-0-1-7.eu-central-1.compute.internal:9092 \
+  --topic topic-1 \
+  --producer.config /etc/kafka/client.properties
+  
+sudo kafka-metadata-quorum --bootstrap-server 10.0.1.240:9093 \
+  --command-config /etc/kafka/controller.properties \
+  describe --status
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+# =============================================================================
+# HEALTH CHECK
+# =============================================================================
+curl http://10.0.1.144:2020/health
+
+
+# =============================================================================
+# BROKER MANAGEMENT
+# =============================================================================
+
+# List all brokers
+curl http://10.0.1.144:2020/brokers | jq
+
+
+# =============================================================================
+# TOPIC MANAGEMENT
+# =============================================================================
+
+# List all topics
+curl http://10.0.1.144:2020/topics | jq
+
+
+
+# Create topic-1
+curl -X POST http://10.0.1.144:2020/topics \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic_name": "topic-1",
+    "partitions": 6,
+    "replication_factor": 3
+  }' | jq
+
+
+
+
+# Create topic-2
+curl -X POST http://10.0.1.144:2020/topics \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic_name": "topic-2",
+    "partitions": 3,
+    "replication_factor": 3
+  }' | jq
+
+
+
+
+# Create topic with configs
+curl -X POST http://10.0.1.144:2020/topics \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic_name": "test-topic",
+    "partitions": 3,
+    "replication_factor": 3,
+    "configs": {
+      "retention.ms": "604800000",
+      "compression.type": "gzip",
+      "min.insync.replicas": "2"
+    }
+  }' | jq
+
+
+
+
+# Describe specific topic
+curl http://10.0.1.144:2020/topics/topic-1 | jq
+
+# Update topic configuration
+curl -X PUT http://10.0.1.144:2020/topics/topic-1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "configs": {
+      "retention.ms": "1209600000",
+      "compression.type": "snappy",
+      "min.insync.replicas": "2"
+    }
+  }' | jq
+
+
+
+
+
+# =============================================================================
+# CONSUMER GROUP MANAGEMENT
+# =============================================================================
+
+# List all consumer groups
+curl http://10.0.1.144:2020/consumer-groups | jq
+
+# Describe specific consumer group
+curl http://10.0.1.144:2020/consumer-groups/connect-cluster | jq
+
+
+
+
+# =============================================================================
+# BATCH OPERATIONS
+# =============================================================================
+
+# Create multiple topics (loop)
+for TOPIC in topic-1 topic-2 analytics-events user-activity; do
+  curl -X POST http://10.0.1.144:2020/topics \
+    -H "Content-Type: application/json" \
+    -d '{
+      "topic_name": "'$TOPIC'",
+      "partitions": 6,
+      "replication_factor": 3
+    }' | jq '.status, .topic_name'
+done
+
+
+
+# Get all topic names
+curl -s http://10.0.1.144:2020/topics | jq -r '.topics[].topic_name'
+
+
+
+
+# Check under-replicated partitions for a topic
+curl -s http://10.0.1.144:2020/topics/topic-1 | \
+  jq '.partitions[] | select((.replicas | length) != (.isrs | length))'
+
+
+
+# Export topic configurations
+curl -s http://10.0.1.144:2020/topics/topic-1 | \
+  jq '{name: .topic_name, partitions: .partition_count, configs: .configurations}'
+
+
+# =============================================================================
+# MONITORING
+# =============================================================================
+
+
+
+# Watch topics (real-time)
+watch -n 5 'curl -s http://10.0.1.144:2020/topics | jq'
+
+# Quick health check
+curl -s http://10.0.1.144:2020/health && \
+curl -s http://10.0.1.144:2020/brokers | jq '.count' && \
+curl -s http://10.0.1.144:2020/topics | jq '.count'
+
+
+
+
+# =============================================================================
+# TROUBLESHOOTING
+# =============================================================================
+
+
+
+# Test connectivity
+curl -v http://10.0.1.144:2020/health
+
+
+
+# Check API logs (if running in Docker)
+docker logs kafka-admin-api
+
+
+
+# Verify broker connectivity
+curl -s http://10.0.1.144:2020/brokers | jq '.brokers[] | {id, host, port}'
