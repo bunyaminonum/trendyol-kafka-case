@@ -1,12 +1,11 @@
-# Trendyol Data Streaming Case Study
+# Multi-AZ Kafka KRaft Platform: Automated Production Deployment on AWS
 
 ## Overview
 
 Production-ready Apache Kafka streaming platform implementing modern Platform Engineering practices. This project demonstrates end-to-end infrastructure automation, security, observability, and operational excellence for a highly available Kafka cluster on AWS.
 
-**Duration**: 7.5 days
 **Cloud Provider**: AWS (eu-central-1)
-**Architecture**: Multi-AZ distributed deployment with KRaft mode
+**Architecture**: Multi-AZ Kafka deployment with KRaft mode
 
 ### Component Distribution
 
